@@ -198,7 +198,14 @@ textarea.in{height:84px;padding:10px 12px;resize:none;font-size:15px}
       <div class="card">
         <div style="font-size:17px;font-weight:800">Cartera trabaja desde la hoja</div>
         <div style="font-size:14px;color:var(--muted)">Revisa las notas en la hoja <strong>NOTAS TIENDAS 2026</strong>, con la vista de filtro «Pendientes Cartera». Allí cambias el Estado a Conciliada o Rechazada y escribes la NC de cruce o el motivo del rechazo.</div>
-        <a class="btn" id="carLink" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;text-decoration:none">Abrir hoja de notas</a>
+        <div class="hr"></div>
+        <label class="f">¿Quién está revisando? <span class="req" style="font-size:12px">Obligatorio</span>
+          <select class="in" id="carNombreSel"></select>
+          <input class="in hidden" id="carNombreIn" placeholder="Nombre y apellido" autocomplete="name">
+        </label>
+        <div class="hint">Cada cambio de estado que hagas en la hoja quedará firmado con este nombre, la fecha y la hora.</div>
+        <button class="btn" id="carAbrir" disabled>Abrir hoja de notas</button>
+        <div class="hint center hidden" id="carSesion"></div>
       </div>
     </div>
   </section>
@@ -393,7 +400,7 @@ async function irInicio(recargar) {
   if (u.rol === 'Cartera') {
     $('carAvatar').textContent = iniciales(u.nombre);
     $('carNombre').textContent = 'Hola, ' + u.nombre.split(' ')[0];
-    $('carLink').href = SHEET_URL;
+    prepararCartera();
     show('s-cartera');
     return;
   }
@@ -434,6 +441,54 @@ function tarjetaNota(n, completa) {
       '<button class="btn-fix" data-fix="' + esc(n.id) + '">Corregir y reenviar</button>';
   }
   return h + '</div>';
+}
+
+/* =================== CARTERA =================== */
+function ultimoRevisor() { try { return localStorage.getItem('notasTiendaRevisor') || ''; } catch (e) { return ''; } }
+function guardarRevisor(n) { try { localStorage.setItem('notasTiendaRevisor', n); } catch (e) {} }
+
+function prepararCartera() {
+  const lista = S.personasCartera || [];
+  const ultimo = ultimoRevisor();
+  const sel = $('carNombreSel'), inp = $('carNombreIn');
+  if (lista.length) {
+    sel.classList.remove('hidden'); inp.classList.add('hidden');
+    sel.innerHTML = '<option value="">Selecciona tu nombre…</option>' +
+      lista.map(n => '<option' + (n === ultimo ? ' selected' : '') + '>' + esc(n) + '</option>').join('');
+  } else {
+    sel.classList.add('hidden'); inp.classList.remove('hidden');
+    inp.value = ultimo;
+  }
+  $('carSesion').classList.add('hidden');
+  validarCartera();
+}
+function nombreCartera() {
+  const lista = S.personasCartera || [];
+  return (lista.length ? $('carNombreSel').value : $('carNombreIn').value).trim().replace(/\s+/g, ' ');
+}
+function validarCartera() { $('carAbrir').disabled = nombreCartera().length < 3; }
+
+async function abrirHojaCartera() {
+  const nombre = nombreCartera();
+  if (nombre.length < 3) { toast('Escribe el nombre de quien revisa', true); return; }
+  if (S.enviando) return;
+  S.enviando = true;
+  // Se abre la pestaña de una vez para que el navegador no la bloquee
+  const ventana = window.open('', '_blank');
+  loading(true, 'Registrando revisión…');
+  try {
+    const j = await api('iniciarRevision', { nombre: nombre });
+    guardarRevisor(nombre);
+    $('carSesion').textContent = 'Revisión abierta a nombre de ' + j.nombre + ' (válida hasta las ' + j.validoHasta + ').';
+    $('carSesion').classList.remove('hidden');
+    if (ventana) ventana.location.href = SHEET_URL;
+    else window.location.href = SHEET_URL;
+  } catch (e) {
+    if (ventana) ventana.close();
+    toast(e.message, true);
+  } finally {
+    S.enviando = false; loading(false);
+  }
 }
 
 /* =================== MIS NOTAS =================== */
@@ -633,6 +688,10 @@ document.addEventListener('keydown', e => {
   else if (e.key === 'Enter') teclaPin('ok');
 });
 document.querySelectorAll('[data-salir]').forEach(b => b.addEventListener('click', salir));
+
+$('carNombreSel').addEventListener('change', validarCartera);
+$('carNombreIn').addEventListener('input', validarCartera);
+$('carAbrir').addEventListener('click', abrirHojaCartera);
 
 $('btnNueva').addEventListener('click', () => abrirForm(null));
 $('btnVerTodas').addEventListener('click', () => irMis('Todas'));
