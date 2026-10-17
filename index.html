@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1F6B4A">
+<title>Notas de Tienda</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F1EFEA; --card:#FFFFFF; --ink:#24221E; --muted:#5E5A52; --soft:#6F6A60;
+  --line:#D9D4C8; --chip:#F6F4EF; --accent:#1F6B4A; --accent-soft:#E3EFE8;
+  --si:#2E7D32; --no:#C62828;
+  --warn-bg:#FFF3D6; --warn-ink:#7A5200; --ok-bg:#E3EFE8; --ok-ink:#165238; --bad-bg:#FBE4E1; --bad-ink:#8E2A1E;
+  --shadow:0 2px 8px rgba(0,0,0,.06); --radius:18px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Manrope,system-ui,sans-serif}
+body{min-height:100vh}
+button,input,select,textarea{font-family:inherit;color:inherit}
+.app{max-width:480px;margin:0 auto;min-height:100vh;position:relative}
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.active{display:flex}
+
+/* Barra superior */
+.topbar{background:var(--card);padding:14px 18px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);position:sticky;top:0;z-index:5}
+.topbar .t{flex:1;min-width:0}
+.topbar .t1{font-size:18px;font-weight:800}
+.topbar .t2{font-size:12px;color:var(--muted)}
+.icon-btn{width:44px;height:44px;border-radius:12px;border:1.5px solid var(--line);background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.btn-out{height:44px;padding:0 14px;border:1.5px solid var(--line);border-radius:12px;background:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer}
+.avatar{width:44px;height:44px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0}
+
+.body{padding:18px;display:flex;flex-direction:column;gap:14px;flex:1}
+.card{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px}
+.sec{font-size:12px;font-weight:800;color:var(--soft);letter-spacing:.6px;text-transform:uppercase}
+label.f{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700}
+.in{height:48px;border:1.5px solid var(--line);border-radius:12px;padding:0 12px;font-size:16px;background:#fff;width:100%;min-width:0}
+.in:focus{outline:none;border-color:var(--accent)}
+textarea.in{height:84px;padding:10px 12px;resize:none;font-size:15px}
+.in.big{height:54px;font-size:20px;font-weight:800}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:44px;padding:0 14px;border-radius:12px;border:1.5px solid var(--line);background:#fff;font-size:14px;font-weight:600;cursor:pointer}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.pill{height:36px;padding:0 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+.pill.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+
+.btn{height:56px;border:none;border-radius:16px;background:var(--accent);color:#fff;font-size:17px;font-weight:800;cursor:pointer;width:100%}
+.btn.sec2{background:#fff;color:var(--ink);border:1.5px solid var(--line);height:52px;font-size:16px;font-weight:700}
+.btn:disabled{opacity:.6}
+.sino{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.btn-no,.btn-si{height:64px;border:none;border-radius:16px;color:#fff;font-size:18px;font-weight:800;cursor:pointer}
+.btn-no{background:var(--no)} .btn-si{background:var(--si)}
+
+/* Login */
+.login{align-items:center;padding:48px 24px 24px}
+.logo{width:88px;height:88px;border-radius:24px;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;color:var(--accent)}
+.login h1{margin:20px 0 4px;font-size:24px;font-weight:800}
+.login p.sub{margin:0;font-size:14px;color:var(--muted)}
+.pinbox{margin-top:32px;width:100%;background:#fff;border-radius:20px;box-shadow:0 4px 14px rgba(0,0,0,.06);padding:24px 20px;display:flex;flex-direction:column;align-items:center;gap:18px}
+.dots{display:flex;gap:18px}
+.dot{width:18px;height:18px;border-radius:50%;border:2px solid #C9C4B8}
+.dot.on{background:var(--accent);border-color:var(--accent)}
+.dots.shake{animation:shake .35s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.keypad{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;width:100%}
+.key{height:62px;border:none;border-radius:14px;background:var(--chip);font-size:24px;font-weight:700;cursor:pointer}
+.key:active{background:#E6E2D8}
+.key.ghost{background:transparent;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.key.go{background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center}
+.login .foot{margin-top:auto;padding-top:24px;font-size:12px;color:var(--soft);text-align:center}
+.err{color:var(--bad-ink);font-size:14px;font-weight:700;min-height:20px;text-align:center}
+
+/* Inicio */
+.hero{height:104px;border:none;border-radius:20px;background:var(--accent);color:#fff;display:flex;align-items:center;gap:16px;padding:0 22px;text-align:left;box-shadow:0 6px 16px rgba(31,107,74,.25);cursor:pointer;width:100%}
+.hero .ic{width:56px;height:56px;border-radius:16px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center}
+.hero .h1{font-size:20px;font-weight:800}
+.hero .h2{font-size:13px;opacity:.9;margin-top:2px}
+.stat{background:#fff;border-radius:16px;padding:14px 16px;box-shadow:var(--shadow)}
+.stat .l{font-size:12px;color:var(--muted);font-weight:600}
+.stat .v{font-size:22px;font-weight:800;margin-top:4px}
+.alerta{background:var(--bad-bg);color:var(--bad-ink);border-radius:14px;padding:12px 14px;font-size:14px;font-weight:700;border:none;text-align:left;cursor:pointer;width:100%}
+.rowh{display:flex;align-items:center;justify-content:space-between;margin-top:4px}
+.rowh h2{margin:0;font-size:16px;font-weight:800}
+.link{background:none;border:none;color:var(--accent);font-size:14px;font-weight:700;cursor:pointer;padding:8px 0}
+
+/* Notas */
+.nota{background:#fff;border-radius:16px;padding:14px 16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px}
+.nota .a{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.nota .doc{font-size:14px;font-weight:800;word-break:break-all}
+.nota .m{font-size:13px;color:var(--muted)}
+.nota .b{display:flex;justify-content:space-between;font-size:13px;gap:8px}
+.nota .b span:first-child{color:var(--soft)}
+.badge{font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;white-space:nowrap}
+.b-Pendiente{background:var(--warn-bg);color:var(--warn-ink)}
+.b-Conciliada{background:var(--ok-bg);color:var(--ok-ink)}
+.b-Rechazada{background:var(--bad-bg);color:var(--bad-ink)}
+.obs{background:#FBF1EF;border-radius:10px;padding:10px 12px;font-size:13px;color:#6B2117}
+.btn-fix{height:44px;border-radius:12px;border:1.5px solid var(--bad-ink);background:#fff;color:var(--bad-ink);font-size:14px;font-weight:700;cursor:pointer}
+.vacio{text-align:center;color:var(--soft);font-size:14px;padding:24px 8px}
+
+/* Fotos */
+.fotos{display:flex;gap:10px;flex-wrap:wrap}
+.thumb{width:96px;height:128px;border-radius:12px;background:#E9E5DC center/cover no-repeat;position:relative}
+.thumb .x{position:absolute;top:-8px;right:-8px;width:30px;height:30px;border-radius:50%;border:none;background:var(--no);color:#fff;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.addfoto{width:96px;height:128px;border-radius:12px;border:2px dashed #B9B3A5;background:#FAF9F6;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:700;cursor:pointer}
+.hint{font-size:12px;color:var(--soft)}
+.req{font-size:12px;font-weight:700;color:var(--bad-ink)}
+
+/* Resumen */
+.kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 10px;font-size:14px}
+.kv .k{font-size:12px;color:var(--soft);font-weight:700}
+.kv .v{font-weight:700;word-break:break-word}
+.hr{height:1px;background:#ECE8DF}
+.mini{display:flex;gap:8px}
+.mini div{width:60px;height:80px;border-radius:10px;background:#E9E5DC center/cover no-repeat}
+.check{width:104px;height:104px;border-radius:50%;background:var(--si);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(46,125,50,.3);margin:40px auto 0}
+.center{text-align:center}
+.lines{display:flex;flex-direction:column;gap:12px;font-size:14px}
+.lines div{display:flex;justify-content:space-between;gap:12px}
+.lines span:first-child{color:var(--soft);font-weight:600}
+.lines span:last-child{font-weight:700;text-align:right}
+
+/* Overlay y toast */
+.overlay{position:fixed;inset:0;background:rgba(36,34,30,.45);display:none;align-items:center;justify-content:center;z-index:50}
+.overlay.on{display:flex}
+.loader{background:#fff;border-radius:18px;padding:22px 26px;display:flex;align-items:center;gap:14px;font-weight:700}
+.spin{width:28px;height:28px;border-radius:50%;border:4px solid var(--accent-soft);border-top-color:var(--accent);animation:sp 0.8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);max-width:440px;width:calc(100% - 32px);background:var(--ink);color:#fff;border-radius:14px;padding:14px 16px;font-size:14px;font-weight:600;z-index:60;display:none}
+.toast.on{display:block}
+.toast.bad{background:var(--no)}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ========== LOGIN ========== -->
+  <section class="screen login active" id="s-login">
+    <div class="logo">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8 2 5 8.5 5 13a7 7 0 0 0 14 0c0-4.5-3-11-7-11z"/></svg>
+    </div>
+    <h1>Notas de Tienda</h1>
+    <p class="sub">Registro comercial · Eje Cafetero</p>
+    <div class="pinbox">
+      <div style="font-size:15px;font-weight:600">Ingresa tu PIN de 4 dígitos</div>
+      <div class="dots" id="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      <div class="keypad" id="keypad">
+        <button class="key" data-k="1">1</button><button class="key" data-k="2">2</button><button class="key" data-k="3">3</button>
+        <button class="key" data-k="4">4</button><button class="key" data-k="5">5</button><button class="key" data-k="6">6</button>
+        <button class="key" data-k="7">7</button><button class="key" data-k="8">8</button><button class="key" data-k="9">9</button>
+        <button class="key ghost" data-k="del" aria-label="Borrar"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg></button>
+        <button class="key" data-k="0">0</button>
+        <button class="key go" data-k="ok" aria-label="Entrar"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></button>
+      </div>
+      <div class="err" id="loginErr"></div>
+    </div>
+    <p class="foot">El PIN identifica a quien registra: cada nota queda firmada con nombre, fecha y hora.</p>
+  </section>
+
+  <!-- ========== INICIO (Comercial / Admin) ========== -->
+  <section class="screen" id="s-inicio">
+    <div class="topbar">
+      <div class="avatar" id="iniAvatar">--</div>
+      <div class="t"><div class="t1" id="iniNombre">Hola</div><div class="t2" id="iniRol"></div></div>
+      <button class="btn-out" data-salir>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Salir
+      </button>
+    </div>
+    <div class="body">
+      <button class="hero" id="btnNueva">
+        <div class="ic"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+        <div><div class="h1">Registrar nueva nota</div><div class="h2">Datos + foto del soporte físico</div></div>
+      </button>
+      <button class="alerta hidden" id="iniAlerta"></button>
+      <div class="grid2">
+        <div class="stat"><div class="l">Notas este mes</div><div class="v" id="stCant">–</div></div>
+        <div class="stat"><div class="l">Valor registrado</div><div class="v" id="stValor">–</div></div>
+      </div>
+      <div class="rowh"><h2>Últimas notas</h2><button class="link" id="btnVerTodas">Ver todas</button></div>
+      <div id="iniLista" style="display:flex;flex-direction:column;gap:10px"></div>
+    </div>
+  </section>
+
+  <!-- ========== CARTERA ========== -->
+  <section class="screen" id="s-cartera">
+    <div class="topbar">
+      <div class="avatar" id="carAvatar">--</div>
+      <div class="t"><div class="t1" id="carNombre">Hola</div><div class="t2">Cartera</div></div>
+      <button class="btn-out" data-salir>Salir</button>
+    </div>
+    <div class="body">
+      <div class="card">
+        <div style="font-size:17px;font-weight:800">Cartera trabaja desde la hoja</div>
+        <div style="font-size:14px;color:var(--muted)">Revisa las notas en la hoja <strong>NOTAS TIENDAS 2026</strong>, con la vista de filtro «Pendientes Cartera». Allí cambias el Estado a Conciliada o Rechazada y escribes la NC de cruce o el motivo del rechazo.</div>
+        <a class="btn" id="carLink" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;text-decoration:none">Abrir hoja de notas</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== FORMULARIO ========== -->
+  <section class="screen" id="s-form">
+    <div class="topbar">
+      <button class="icon-btn" id="formBack" aria-label="Volver"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <div class="t"><div class="t1" id="formTitulo">Nueva nota</div><div class="t2">Paso 1 de 2 · Datos y soporte</div></div>
+    </div>
+    <div class="body">
+      <div class="obs hidden" id="formObs"></div>
+      <div class="card">
+        <div class="sec">¿De qué tienda es?</div>
+        <label class="f">Cadena / cliente<select class="in" id="fCadena"></select></label>
+        <label class="f">Tienda / sucursal<select class="in" id="fTienda"></select></label>
+      </div>
+      <div class="card">
+        <div class="sec">Tipo de nota</div>
+        <div class="chips" id="fTipos"></div>
+      </div>
+      <div class="card">
+        <div class="sec">Datos del documento</div>
+        <label class="f"># Documento de la nota<input class="in" id="fDoc" autocomplete="off" autocapitalize="characters" placeholder="Ej: NDP-4757"></label>
+        <div class="grid2">
+          <label class="f">Fecha documento<input class="in" type="date" id="fFDoc"></label>
+          <label class="f">Fecha vencimiento<input class="in" type="date" id="fFVto"></label>
+        </div>
+        <label class="f">Total $COP<input class="in big" id="fTotal" inputmode="numeric" autocomplete="off" placeholder="$ 0"></label>
+        <label class="f">Notas / observación<textarea class="in" id="fNotas" maxlength="1000" placeholder="Detalle de la nota"></textarea></label>
+      </div>
+      <div class="card">
+        <div class="rowh" style="margin:0"><div class="sec">Foto del soporte físico</div><span class="req" id="fFotoReq">Obligatoria</span></div>
+        <div class="fotos" id="fFotos"></div>
+        <div class="hint" id="fFotoHint">Toma la foto de la nota física. Hasta 3 fotos por nota.</div>
+        <button class="link" id="btnGaleria" style="align-self:flex-start">o subir desde la galería</button>
+        <input type="file" accept="image/*" capture="environment" id="inCam" class="hidden">
+        <input type="file" accept="image/*" id="inGal" class="hidden">
+      </div>
+      <button class="btn" id="btnRevisar">Revisar antes de enviar</button>
+    </div>
+  </section>
+
+  <!-- ========== CONFIRMAR ========== -->
+  <section class="screen" id="s-confirm">
+    <div class="topbar">
+      <button class="icon-btn" id="confBack" aria-label="Volver"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <div class="t"><div class="t1">Revisar nota</div><div class="t2">Paso 2 de 2 · Confirmación</div></div>
+    </div>
+    <div class="body">
+      <div class="card" id="confCard"></div>
+      <div class="card" style="flex-direction:row;align-items:center;gap:12px">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5E5A52" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>
+        <div style="font-size:13px;color:var(--muted)">Responsable: <strong style="color:var(--ink)" id="confResp"></strong><br>Se registrará con la fecha y hora del envío.</div>
+      </div>
+      <div style="margin-top:auto;display:flex;flex-direction:column;gap:12px">
+        <div class="center" style="font-size:16px;font-weight:800">¿Los datos son correctos?</div>
+        <div class="sino">
+          <button class="btn-no" id="btnNo">NO · Corregir</button>
+          <button class="btn-si" id="btnSi">SÍ · Enviar</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== ÉXITO ========== -->
+  <section class="screen" id="s-exito">
+    <div class="body" style="padding:24px">
+      <div class="check"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <h1 class="center" style="margin:20px 0 0;font-size:24px;font-weight:800" id="exTitulo">Nota registrada</h1>
+      <p class="center" style="margin:0;color:var(--muted)">Ya quedó en la base de Cartera.</p>
+      <div class="card lines" id="exDatos" style="margin-top:12px"></div>
+      <div style="margin-top:auto;display:flex;flex-direction:column;gap:12px">
+        <button class="btn" id="exOtra">Registrar otra nota</button>
+        <button class="btn sec2" id="exInicio">Volver al inicio</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== MIS NOTAS ========== -->
+  <section class="screen" id="s-mis">
+    <div class="topbar">
+      <button class="icon-btn" id="misBack" aria-label="Volver"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <div class="t"><div class="t1">Mis notas</div><div class="t2">Seguimiento de lo registrado</div></div>
+      <button class="icon-btn" id="misRefresh" aria-label="Actualizar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
+    </div>
+    <div class="body">
+      <div class="chips" id="misFiltros"></div>
+      <input class="in" id="misBuscar" placeholder="Buscar # documento o tienda">
+      <div id="misLista" style="display:flex;flex-direction:column;gap:10px"></div>
+    </div>
+  </section>
+</div>
+
+<div class="overlay" id="overlay"><div class="loader"><div class="spin"></div><span id="overlayTxt">Cargando…</span></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* =================== CONFIGURACIÓN =================== */
+const API_URL = 'https://script.google.com/macros/s/AKfycbwKvQa0BzLh4B-wRvpGcQiQ4eQd6ssCSCqVZFYlXzRMoIcP5AnvRf2g0Vj1YORmDIozgw/exec';
+const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1vwyyTs40CKvqU7yk-HM5qlPJ9ys7s_vSjYxgfRJmorE/edit';
+const MAX_FOTOS = 3;
+const FOTO_MAX_PX = 1400;
+const FOTO_CALIDAD = 0.7;
+const ESTADO_TXT = { Pendiente: 'En cartera', Conciliada: 'Conciliada', Rechazada: 'Rechazada' };
+
+/* =================== ESTADO =================== */
+const S = {
+  pin: '', usuario: null, tiendas: [], tipos: [],
+  notas: [], resumen: { mesCant: 0, mesValor: 0 },
+  pinBuffer: '', enviando: false,
+  form: null, fotos: [], editId: null, filtro: 'Todas'
+};
+
+/* =================== UTILIDADES =================== */
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const pad = (n) => String(n).padStart(2, '0');
+function hoyIso() { const d = new Date(); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+function isoAFecha(iso) { const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? m[3] + '/' + m[2] + '/' + m[1] : (iso || ''); }
+function pesos(n) { return '$' + Number(n || 0).toLocaleString('es-CO', { maximumFractionDigits: 0 }); }
+function soloDigitos(s) { return String(s || '').replace(/\D/g, ''); }
+function iniciales(nombre) { return String(nombre || '').split(/\s+/).filter(Boolean).slice(0, 2).map(p => p[0]).join('').toUpperCase() || '--'; }
+function norm(s) { return String(s || '').trim().toUpperCase(); }
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+function loading(on, txt) { $('overlayTxt').textContent = txt || 'Cargando…'; $('overlay').classList.toggle('on', !!on); }
+let toastTimer;
+function toast(msg, bad) {
+  const t = $('toast'); t.textContent = msg; t.classList.toggle('bad', !!bad); t.classList.add('on');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('on'), bad ? 6000 : 3000);
+}
+
+async function api(action, data) {
+  const body = Object.assign({ action: action, pin: S.pin }, data || {});
+  let r;
+  try {
+    r = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) });
+  } catch (e) {
+    throw new Error('Sin conexión. Revisa tus datos o WiFi e intenta de nuevo.');
+  }
+  let j;
+  try { j = await r.json(); } catch (e) { throw new Error('Respuesta inválida del servidor'); }
+  if (!j.ok) throw new Error(j.error || 'Error desconocido');
+  return j;
+}
+
+function guardarSesion() { try { sessionStorage.setItem('notasTienda', JSON.stringify({ pin: S.pin, usuario: S.usuario })); } catch (e) {} }
+function borrarSesion() { try { sessionStorage.removeItem('notasTienda'); } catch (e) {} }
+function leerSesion() { try { return JSON.parse(sessionStorage.getItem('notasTienda') || 'null'); } catch (e) { return null; } }
+
+/* =================== LOGIN =================== */
+function pintarDots() {
+  document.querySelectorAll('#dots .dot').forEach((d, i) => d.classList.toggle('on', i < S.pinBuffer.length));
+}
+function teclaPin(k) {
+  if (S.enviando) return;
+  $('loginErr').textContent = '';
+  if (k === 'del') S.pinBuffer = S.pinBuffer.slice(0, -1);
+  else if (k === 'ok') { if (S.pinBuffer.length === 4) entrar(); return; }
+  else if (S.pinBuffer.length < 4) S.pinBuffer += k;
+  pintarDots();
+  if (S.pinBuffer.length === 4) entrar();
+}
+async function entrar() {
+  S.enviando = true; loading(true, 'Validando PIN…');
+  try {
+    S.pin = S.pinBuffer;
+    const j = await api('getDatos');
+    S.usuario = j.usuario; S.tiendas = j.tiendas; S.tipos = j.tipos;
+    guardarSesion();
+    S.pinBuffer = ''; pintarDots();
+    await irInicio(true);
+  } catch (e) {
+    S.pin = ''; S.pinBuffer = ''; pintarDots();
+    $('loginErr').textContent = e.message;
+    const d = $('dots'); d.classList.remove('shake'); void d.offsetWidth; d.classList.add('shake');
+  } finally { S.enviando = false; loading(false); }
+}
+function salir() {
+  S.pin = ''; S.usuario = null; S.notas = []; S.pinBuffer = ''; pintarDots();
+  borrarSesion(); $('loginErr').textContent = ''; show('s-login');
+}
+
+/* =================== INICIO =================== */
+async function irInicio(recargar) {
+  const u = S.usuario;
+  if (u.rol === 'Cartera') {
+    $('carAvatar').textContent = iniciales(u.nombre);
+    $('carNombre').textContent = 'Hola, ' + u.nombre.split(' ')[0];
+    $('carLink').href = SHEET_URL;
+    show('s-cartera');
+    return;
+  }
+  $('iniAvatar').textContent = iniciales(u.nombre);
+  $('iniNombre').textContent = 'Hola, ' + u.nombre.split(' ')[0];
+  $('iniRol').textContent = (u.rol === 'Admin' ? 'Administrador' : 'Comercial') + (u.zona ? ' · Zona ' + u.zona : '');
+  show('s-inicio');
+  pintarInicio();
+  if (recargar) await cargarNotas(false);
+}
+async function cargarNotas(conLoader) {
+  if (conLoader) loading(true, 'Actualizando…');
+  try {
+    const j = await api('misNotas');
+    S.notas = j.notas; S.resumen = j.resumen;
+    pintarInicio(); pintarMis();
+  } catch (e) { toast(e.message, true); }
+  finally { if (conLoader) loading(false); }
+}
+function pintarInicio() {
+  $('stCant').textContent = S.resumen.mesCant;
+  $('stValor').textContent = pesos(S.resumen.mesValor);
+  const rech = S.notas.filter(n => n.estado === 'Rechazada').length;
+  const al = $('iniAlerta');
+  if (rech) { al.textContent = '⚠ Tienes ' + rech + (rech === 1 ? ' nota rechazada' : ' notas rechazadas') + ' por Cartera. Toca para corregir.'; al.classList.remove('hidden'); }
+  else al.classList.add('hidden');
+  const ult = S.notas.slice(0, 3);
+  $('iniLista').innerHTML = ult.length ? ult.map(n => tarjetaNota(n, false)).join('') : '<div class="vacio">Aún no has registrado notas.</div>';
+}
+function tarjetaNota(n, completa) {
+  let h = '<div class="nota">' +
+    '<div class="a"><span class="doc">' + esc(n.numDoc) + '</span><span class="badge b-' + esc(n.estado) + '">' + esc(ESTADO_TXT[n.estado] || n.estado) + '</span></div>' +
+    '<div class="m">' + esc(n.cadena) + ' · ' + esc(n.tienda) + ' · ' + esc(n.tipo) + (S.usuario.rol === 'Admin' ? ' · ' + esc(n.comercial) : '') + '</div>' +
+    '<div class="b"><span>' + esc(n.registro) + '</span><strong>' + pesos(n.total) + '</strong></div>';
+  if (completa && n.estado === 'Conciliada' && n.nc) h += '<div class="m">Cruce: <strong style="color:var(--ink)">' + esc(n.nc) + '</strong></div>';
+  if (completa && n.estado === 'Rechazada') {
+    h += '<div class="obs"><strong>Cartera:</strong> ' + esc(n.obs || 'Sin motivo escrito, consulta con Cartera.') + '</div>' +
+      '<button class="btn-fix" data-fix="' + esc(n.id) + '">Corregir y reenviar</button>';
+  }
+  return h + '</div>';
+}
+
+/* =================== MIS NOTAS =================== */
+function irMis(filtro) {
+  if (filtro) S.filtro = filtro;
+  show('s-mis'); pintarMis();
+}
+function pintarMis() {
+  const cuenta = { Todas: S.notas.length, Pendiente: 0, Conciliada: 0, Rechazada: 0 };
+  S.notas.forEach(n => { if (cuenta[n.estado] != null) cuenta[n.estado]++; });
+  const etiquetas = [['Todas', 'Todas'], ['Pendiente', 'En cartera'], ['Conciliada', 'Conciliadas'], ['Rechazada', 'Rechazadas']];
+  $('misFiltros').innerHTML = etiquetas.map(([k, t]) =>
+    '<button class="pill' + (S.filtro === k ? ' on' : '') + '" data-filtro="' + k + '">' + t + ' · ' + cuenta[k] + '</button>').join('');
+  const q = norm($('misBuscar').value);
+  const lista = S.notas.filter(n =>
+    (S.filtro === 'Todas' || n.estado === S.filtro) &&
+    (!q || norm(n.numDoc).includes(q) || norm(n.tienda).includes(q) || norm(n.cadena).includes(q)));
+  $('misLista').innerHTML = lista.length ? lista.map(n => tarjetaNota(n, true)).join('') : '<div class="vacio">No hay notas en este filtro.</div>';
+}
+
+/* =================== FORMULARIO =================== */
+function cadenas() { return [...new Set(S.tiendas.map(t => t.cadena))].sort((a, b) => a.localeCompare(b)); }
+
+function abrirForm(nota) {
+  if (!S.tiendas.length) { toast('No tienes tiendas asignadas. Pide a tu administrador que te las asigne.', true); return; }
+  S.editId = nota ? nota.id : null;
+  S.fotos = [];
+  S.form = nota ? {
+    cadena: nota.cadena, tienda: nota.tienda, tipo: nota.tipo, numDoc: nota.numDoc,
+    fechaDoc: nota.fechaDoc, fechaVto: nota.fechaVto, total: String(nota.total),
+    notas: String(nota.notas || '').replace(/\s*\|\s*Rechazo previo.*$/, '')
+  } : { cadena: '', tienda: '', tipo: '', numDoc: '', fechaDoc: hoyIso(), fechaVto: hoyIso(), total: '', notas: '' };
+
+  const cs = cadenas();
+  if (!S.form.cadena && cs.length === 1) S.form.cadena = cs[0];
+  $('fCadena').innerHTML = '<option value="">Selecciona…</option>' + cs.map(c => '<option' + (c === S.form.cadena ? ' selected' : '') + '>' + esc(c) + '</option>').join('');
+  llenarTiendas();
+  pintarTipos();
+  $('fDoc').value = S.form.numDoc;
+  $('fFDoc').value = S.form.fechaDoc;
+  $('fFVto').value = S.form.fechaVto;
+  $('fTotal').value = S.form.total ? '$ ' + Number(S.form.total).toLocaleString('es-CO') : '';
+  $('fNotas').value = S.form.notas;
+
+  $('formTitulo').textContent = nota ? 'Corregir nota' : 'Nueva nota';
+  const ob = $('formObs');
+  if (nota) { ob.innerHTML = '<strong>Motivo del rechazo:</strong> ' + esc(nota.obs || 'Sin motivo escrito'); ob.classList.remove('hidden'); }
+  else ob.classList.add('hidden');
+  $('fFotoReq').textContent = nota ? 'Opcional' : 'Obligatoria';
+  $('fFotoHint').textContent = nota
+    ? 'Si tomas fotos nuevas, reemplazan a las anteriores. Si no, se conservan las que ya estaban.'
+    : 'Toma la foto de la nota física. Hasta 3 fotos por nota.';
+  pintarFotos();
+  show('s-form');
+}
+function llenarTiendas() {
+  const c = $('fCadena').value;
+  const ts = S.tiendas.filter(t => t.cadena === c).sort((a, b) => a.sucursal.localeCompare(b.sucursal));
+  if (ts.length === 1) S.form.tienda = ts[0].sucursal;
+  if (!ts.some(t => t.sucursal === S.form.tienda)) S.form.tienda = ts.length === 1 ? ts[0].sucursal : '';
+  $('fTienda').innerHTML = (c ? '<option value="">Selecciona…</option>' : '<option value="">Primero elige la cadena</option>') +
+    ts.map(t => '<option value="' + esc(t.sucursal) + '"' + (t.sucursal === S.form.tienda ? ' selected' : '') + '>' +
+      esc(t.sucursal) + (t.ciudad ? ' (' + esc(t.ciudad) + ')' : '') + '</option>').join('');
+}
+function pintarTipos() {
+  $('fTipos').innerHTML = S.tipos.map(t => '<button class="chip' + (t === S.form.tipo ? ' on' : '') + '" data-tipo="' + esc(t) + '">' + esc(t) + '</button>').join('');
+}
+function pintarFotos() {
+  let h = S.fotos.map((f, i) => '<div class="thumb" style="background-image:url(' + f.preview + ')"><button class="x" data-delfoto="' + i + '" aria-label="Quitar foto">×</button></div>').join('');
+  if (S.fotos.length < MAX_FOTOS) {
+    h += '<button class="addfoto" id="btnCam"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>' +
+      (S.fotos.length ? 'Otra foto' : 'Tomar foto') + '</button>';
+  }
+  $('fFotos').innerHTML = h;
+  $('btnGaleria').classList.toggle('hidden', S.fotos.length >= MAX_FOTOS);
+}
+function comprimir(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      let w = img.naturalWidth, h = img.naturalHeight;
+      const k = Math.min(1, FOTO_MAX_PX / Math.max(w, h));
+      w = Math.round(w * k); h = Math.round(h * k);
+      const c = document.createElement('canvas'); c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      const dataUrl = c.toDataURL('image/jpeg', FOTO_CALIDAD);
+      URL.revokeObjectURL(url);
+      resolve({ data: dataUrl.split(',')[1], mime: 'image/jpeg', preview: dataUrl });
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('No se pudo leer la foto')); };
+    img.src = url;
+  });
+}
+async function agregarFoto(input) {
+  const file = input.files && input.files[0];
+  input.value = '';
+  if (!file) return;
+  if (S.fotos.length >= MAX_FOTOS) { toast('Máximo ' + MAX_FOTOS + ' fotos'); return; }
+  loading(true, 'Procesando foto…');
+  try { S.fotos.push(await comprimir(file)); pintarFotos(); }
+  catch (e) { toast(e.message, true); }
+  finally { loading(false); }
+}
+function leerForm() {
+  S.form.cadena = $('fCadena').value;
+  S.form.tienda = $('fTienda').value;
+  S.form.numDoc = $('fDoc').value.trim().toUpperCase();
+  S.form.fechaDoc = $('fFDoc').value;
+  S.form.fechaVto = $('fFVto').value;
+  S.form.total = soloDigitos($('fTotal').value);
+  S.form.notas = $('fNotas').value.trim();
+}
+function validarForm() {
+  const f = S.form;
+  if (!f.cadena) return 'Selecciona la cadena';
+  if (!f.tienda) return 'Selecciona la tienda';
+  if (!f.tipo) return 'Selecciona el tipo de nota';
+  if (!f.numDoc) return 'Escribe el número de documento';
+  if (!f.fechaDoc) return 'Falta la fecha del documento';
+  if (!f.fechaVto) return 'Falta la fecha de vencimiento';
+  if (f.fechaVto < f.fechaDoc) return 'La fecha de vencimiento no puede ser anterior a la del documento';
+  if (!Number(f.total)) return 'Escribe el total en pesos';
+  if (!S.editId && !S.fotos.length) return 'Toma la foto del soporte físico';
+  return '';
+}
+function revisar() {
+  leerForm();
+  const err = validarForm();
+  if (err) { toast(err, true); return; }
+  const f = S.form;
+  const t = S.tiendas.find(x => x.cadena === f.cadena && x.sucursal === f.tienda);
+  const fotosTxt = S.fotos.length
+    ? S.fotos.length + (S.fotos.length === 1 ? ' foto de soporte adjunta' : ' fotos de soporte adjuntas')
+    : 'Se conservan las fotos anteriores';
+  $('confCard').innerHTML =
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">' +
+      '<div><div class="sec">Documento</div><div style="font-size:22px;font-weight:800;word-break:break-all">' + esc(f.numDoc) + '</div></div>' +
+      '<span class="badge b-Conciliada">' + esc(f.tipo) + '</span></div>' +
+    '<div class="hr"></div>' +
+    '<div class="kv">' +
+      '<div><div class="k">Tienda</div><div class="v">' + esc(f.cadena) + ' – ' + esc(f.tienda) + (t && t.ciudad ? ' (' + esc(t.ciudad) + ')' : '') + '</div></div>' +
+      '<div><div class="k">Total</div><div class="v" style="font-size:18px;font-weight:800">' + pesos(f.total) + '</div></div>' +
+      '<div><div class="k">Fecha documento</div><div class="v">' + isoAFecha(f.fechaDoc) + '</div></div>' +
+      '<div><div class="k">Fecha vencimiento</div><div class="v">' + isoAFecha(f.fechaVto) + '</div></div>' +
+    '</div>' +
+    (f.notas ? '<div><div class="k" style="font-size:12px;color:var(--soft);font-weight:700">Notas</div><div style="font-size:14px">' + esc(f.notas) + '</div></div>' : '') +
+    '<div style="display:flex;gap:10px;align-items:center"><div class="mini">' +
+      S.fotos.map(x => '<div style="background-image:url(' + x.preview + ')"></div>').join('') +
+    '</div><div style="font-size:13px;color:var(--muted)">' + fotosTxt + '</div></div>';
+  $('confResp').textContent = S.usuario.nombre;
+  $('btnSi').disabled = false;
+  show('s-confirm');
+}
+async function enviar() {
+  if (S.enviando) return;
+  S.enviando = true; $('btnSi').disabled = true;
+  loading(true, S.fotos.length ? 'Enviando nota y fotos…' : 'Enviando nota…');
+  const f = S.form;
+  const nota = { cadena: f.cadena, tienda: f.tienda, tipo: f.tipo, numDoc: f.numDoc, fechaDoc: f.fechaDoc, fechaVto: f.fechaVto, total: f.total, notas: f.notas };
+  const fotos = S.fotos.map(x => ({ data: x.data, mime: x.mime }));
+  try {
+    let j, id, registro;
+    if (S.editId) {
+      j = await api('reenviarNota', { id: S.editId, nota: nota, fotos: fotos });
+      id = j.id; registro = new Date().toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' });
+    } else {
+      j = await api('registrarNota', { nota: nota, fotos: fotos });
+      id = j.id; registro = j.registro;
+    }
+    $('exTitulo').textContent = S.editId ? 'Nota corregida y reenviada' : 'Nota registrada';
+    $('exDatos').innerHTML =
+      '<div><span>Consecutivo app</span><span>' + esc(id) + '</span></div>' +
+      '<div><span>Documento</span><span>' + esc(f.numDoc) + '</span></div>' +
+      '<div><span>Tienda</span><span>' + esc(f.cadena) + ' – ' + esc(f.tienda) + '</span></div>' +
+      '<div><span>Total</span><span>' + pesos(f.total) + '</span></div>' +
+      '<div class="hr" style="display:block"></div>' +
+      '<div><span>Registrado por</span><span>' + esc(S.usuario.nombre) + '</span></div>' +
+      '<div><span>Fecha y hora</span><span>' + esc(registro) + '</span></div>';
+    S.fotos = []; S.editId = null;
+    show('s-exito');
+    cargarNotas(false);
+  } catch (e) {
+    toast(e.message, true);
+    $('btnSi').disabled = false;
+  } finally {
+    S.enviando = false; loading(false);
+  }
+}
+
+/* =================== EVENTOS =================== */
+$('keypad').addEventListener('click', e => { const b = e.target.closest('[data-k]'); if (b) teclaPin(b.dataset.k); });
+document.addEventListener('keydown', e => {
+  if (!$('s-login').classList.contains('active')) return;
+  if (/^\d$/.test(e.key)) teclaPin(e.key);
+  else if (e.key === 'Backspace') teclaPin('del');
+  else if (e.key === 'Enter') teclaPin('ok');
+});
+document.querySelectorAll('[data-salir]').forEach(b => b.addEventListener('click', salir));
+
+$('btnNueva').addEventListener('click', () => abrirForm(null));
+$('btnVerTodas').addEventListener('click', () => irMis('Todas'));
+$('iniAlerta').addEventListener('click', () => irMis('Rechazada'));
+$('iniLista').addEventListener('click', e => { if (e.target.closest('.nota')) irMis('Todas'); });
+
+$('misBack').addEventListener('click', () => irInicio(false));
+$('misRefresh').addEventListener('click', () => cargarNotas(true));
+$('misBuscar').addEventListener('input', pintarMis);
+$('misFiltros').addEventListener('click', e => { const b = e.target.closest('[data-filtro]'); if (b) { S.filtro = b.dataset.filtro; pintarMis(); } });
+$('misLista').addEventListener('click', e => {
+  const b = e.target.closest('[data-fix]'); if (!b) return;
+  const n = S.notas.find(x => x.id === b.dataset.fix); if (n) abrirForm(n);
+});
+
+$('formBack').addEventListener('click', () => { S.fotos = []; S.editId = null; irInicio(false); });
+$('fCadena').addEventListener('change', () => { S.form.cadena = $('fCadena').value; S.form.tienda = ''; llenarTiendas(); });
+$('fTipos').addEventListener('click', e => { const b = e.target.closest('[data-tipo]'); if (b) { S.form.tipo = b.dataset.tipo; pintarTipos(); } });
+$('fDoc').addEventListener('input', e => { const p = e.target.selectionStart; e.target.value = e.target.value.toUpperCase(); e.target.setSelectionRange(p, p); });
+$('fTotal').addEventListener('input', e => { const d = soloDigitos(e.target.value); e.target.value = d ? '$ ' + Number(d).toLocaleString('es-CO') : ''; });
+$('fFotos').addEventListener('click', e => {
+  const del = e.target.closest('[data-delfoto]');
+  if (del) { S.fotos.splice(Number(del.dataset.delfoto), 1); pintarFotos(); return; }
+  if (e.target.closest('#btnCam')) $('inCam').click();
+});
+$('btnGaleria').addEventListener('click', () => $('inGal').click());
+$('inCam').addEventListener('change', e => agregarFoto(e.target));
+$('inGal').addEventListener('change', e => agregarFoto(e.target));
+$('btnRevisar').addEventListener('click', revisar);
+
+$('confBack').addEventListener('click', () => show('s-form'));
+$('btnNo').addEventListener('click', () => show('s-form'));
+$('btnSi').addEventListener('click', enviar);
+
+$('exOtra').addEventListener('click', () => abrirForm(null));
+$('exInicio').addEventListener('click', () => irInicio(false));
+
+/* =================== ARRANQUE =================== */
+(async function init() {
+  const ses = leerSesion();
+  if (!ses || !ses.pin) return;
+  S.pin = ses.pin; S.usuario = ses.usuario;
+  loading(true, 'Cargando…');
+  try {
+    const j = await api('getDatos');
+    S.usuario = j.usuario; S.tiendas = j.tiendas; S.tipos = j.tipos;
+    guardarSesion();
+    await irInicio(true);
+  } catch (e) { salir(); }
+  finally { loading(false); }
+})();
+</script>
+</body>
+</html>
