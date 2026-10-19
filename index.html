@@ -38,7 +38,7 @@ button,input,select,textarea{font-family:inherit;color:inherit}
 .btn-out{height:42px;padding:0 14px;border:1px solid #EADBC6;border-radius:12px;background:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer}
 .avatar{width:48px;height:48px;border-radius:50%;background:var(--accent-soft);color:var(--accent-ink);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px;flex-shrink:0}
 .saludo{display:flex;align-items:center;gap:12px}
-.saludo .n{font-family:var(--display);font-size:22px;font-weight:600}
+.saludo .n{font-family:var(--display);font-size:22px;font-weight:600;line-height:1.15;word-break:break-word}
 .saludo .r{font-size:13px;color:var(--muted)}
 
 .body{padding:18px;display:flex;flex-direction:column;gap:14px;flex:1}
@@ -230,7 +230,7 @@ textarea.in{font-size:16px}
       </button>
     </div>
     <div class="body">
-      <div class="saludo"><div class="avatar" id="iniAvatar">--</div><div><div class="n" id="iniNombre">Hola</div><div class="r" id="iniRol"></div></div></div>
+      <div class="saludo"><div class="avatar" id="iniAvatar">--</div><div style="min-width:0"><div class="r">Hola,</div><div class="n" id="iniNombre"></div><div class="r" id="iniRol"></div></div></div>
       <button class="hero" id="btnNueva">
         <div class="ic"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
         <div><div class="h1">Registrar nueva nota</div><div class="h2">Datos + foto del soporte físico</div></div>
@@ -258,7 +258,7 @@ textarea.in{font-size:16px}
       <button class="btn-out" data-salir>Salir</button>
     </div>
     <div class="body">
-      <div class="saludo"><div class="avatar" id="carAvatar">--</div><div><div class="n" id="carNombre">Hola</div><div class="r">Cartera</div></div></div>
+      <div class="saludo"><div class="avatar" id="carAvatar">--</div><div style="min-width:0"><div class="r">Hola,</div><div class="n" id="carNombre"></div><div class="r">Cartera</div></div></div>
       <div class="car-grid">
         <div class="card">
           <div class="titulo" style="font-size:22px">Cartera trabaja desde la hoja</div>
@@ -408,7 +408,11 @@ function hoyIso() { const d = new Date(); return d.getFullYear() + '-' + pad(d.g
 function isoAFecha(iso) { const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? m[3] + '/' + m[2] + '/' + m[1] : (iso || ''); }
 function pesos(n) { return '$' + Number(n || 0).toLocaleString('es-CO', { maximumFractionDigits: 0 }); }
 function soloDigitos(s) { return String(s || '').replace(/\D/g, ''); }
-function iniciales(nombre) { return String(nombre || '').split(/\s+/).filter(Boolean).slice(0, 2).map(p => p[0]).join('').toUpperCase() || '--'; }
+function iniciales(nombre) {
+  // Toma solo palabras con letras (ignora códigos como G001 y guiones)
+  const palabras = String(nombre || '').split(/[\s\-–]+/).filter(w => /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/.test(w) && !/\d/.test(w));
+  return palabras.slice(0, 2).map(p => p[0]).join('').toUpperCase() || '--';
+}
 function norm(s) { return String(s || '').trim().toUpperCase(); }
 
 function show(id) {
@@ -479,14 +483,14 @@ async function irInicio(recargar) {
   const u = S.usuario;
   if (u.rol === 'Cartera') {
     $('carAvatar').textContent = iniciales(u.nombre);
-    $('carNombre').textContent = 'Hola, ' + u.nombre.split(' ')[0];
+    $('carNombre').textContent = u.nombre;
     prepararCartera();
     document.body.classList.add('modo-pc');
     show('s-cartera');
     return;
   }
   $('iniAvatar').textContent = iniciales(u.nombre);
-  $('iniNombre').textContent = 'Hola, ' + u.nombre.split(' ')[0];
+  $('iniNombre').textContent = u.nombre;
   $('iniRol').textContent = (u.rol === 'Admin' ? 'Administrador' : 'Comercial') + (u.zona ? ' · Zona ' + u.zona : '');
   $('btnHoja').href = SHEET_URL;
   $('btnHoja').classList.toggle('hidden', u.rol !== 'Admin');
